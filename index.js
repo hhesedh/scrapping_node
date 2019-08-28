@@ -5,26 +5,23 @@ const path = require('path');
 const yargs = require('yargs');
 
 const obtemjsonTrackInfo = arquivo => {
-  let jsonTrackInfo;
-  arquivo.split('\n').forEach(linha => {
-    if (linha.includes('trackinfo:')) {
-      let linhaFormatada = linha
-        .slice(0, linha.length - 1)
-        .replace('trackinfo:', '')
-        .trim();
-      jsonTrackInfo = JSON.parse(linhaFormatada);
-    }
-  });
-  return jsonTrackInfo;
+  const jsonTrackInfo = arquivo
+    .split('\n')
+    .find(linha => linha.includes('trackinfo:'))
+    .slice(0, -1)
+    .replace('trackinfo:', '')
+    .trim();
+
+  return JSON.parse(jsonTrackInfo);
 };
 
 const obtemNomeAlbum = arquivo => {
-  let nomeAlbum;
-  arquivo.split('\n').forEach(linha => {
-    if (linha.includes('album_title:')) {
-      return (nomeAlbum = linha.split('"')[1].replace(/\W+/g, ' '));
-    }
-  });
+  const nomeAlbum = arquivo
+    .split('\n')
+    .find(linha => linha.includes('album_title:'))
+    .split('"')[1]
+    .replace(/\W+/g, ' ');
+
   return nomeAlbum;
 };
 
@@ -59,6 +56,7 @@ const obtemMusicas = async (nomeAlbum, musica) => {
     writer.on('error', reject);
   });
 };
+
 const argv = yargs.alias('u', 'url').demandOption('url').argv;
 
 request(argv.url, async (err, res, body) => {
